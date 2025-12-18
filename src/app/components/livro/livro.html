@@ -183,15 +183,16 @@
             <nz-form-item>
               <nz-form-label [nzSpan]="24" nzRequired>Valor</nz-form-label>
               <nz-form-control [nzSpan]="24">
-                <nz-input-number
-                  [(ngModel)]="currentLivro.valor"
-                  name="valor"
-                  [nzMin]="0"
-                  [nzStep]="0.01"
-                  [nzPrecision]="2"
-                  nzPlaceHolder="R$ 0,00"
-                  style="width: 100%"
-                ></nz-input-number>
+                <nz-input-group nzPrefix="R$">
+                  <input
+                    nz-input
+                    [(ngModel)]="valorFormatado"
+                    name="valor"
+                    placeholder="0,00"
+                    (blur)="formatValor()"
+                    (focus)="onValorFocus()"
+                  />
+                </nz-input-group>
               </nz-form-control>
             </nz-form-item>
           </div>

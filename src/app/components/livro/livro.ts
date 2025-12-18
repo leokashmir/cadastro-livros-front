@@ -62,6 +62,7 @@ export class Livro implements OnInit {
   assuntos: Assunto[] = [];
   selectedAutorIds: number[] = [];
   selectedAssuntoIds: number[] = [];
+  valorFormatado: string = '0,00';
 
   constructor(
     private livroService: LivroService,
@@ -147,6 +148,7 @@ export class Livro implements OnInit {
     this.currentLivro = this.getEmptyLivro();
     this.selectedAutorIds = [];
     this.selectedAssuntoIds = [];
+    this.valorFormatado = '0,00';
     this.isModalVisible = true;
   }
 
@@ -155,6 +157,7 @@ export class Livro implements OnInit {
     this.currentLivro = { ...livro };
     this.selectedAutorIds = livro.autores.map(a => a.id);
     this.selectedAssuntoIds = livro.assuntos.map(a => a.id);
+    this.formatValorFromModel();
     this.isModalVisible = true;
   }
 
@@ -266,6 +269,32 @@ export class Livro implements OnInit {
 
   getAssuntosDescricoes(assuntos: Assunto[]): string {
     return assuntos.map(a => a.descricao).join(', ');
+  }
+
+  formatValor(): void {
+    // Remove tudo que não é número
+    let valor = this.valorFormatado.replace(/\D/g, '');
+
+    // Converte para número (centavos)
+    let numero = parseInt(valor) || 0;
+
+    // Converte centavos para reais
+    this.currentLivro.valor = numero / 100;
+
+    // Formata para exibição
+    this.valorFormatado = (numero / 100).toFixed(2).replace('.', ',');
+  }
+
+  onValorFocus(): void {
+    // Remove a formatação quando o usuário focar no campo
+    if (this.valorFormatado === '0,00') {
+      this.valorFormatado = '';
+    }
+  }
+
+  formatValorFromModel(): void {
+    // Formata o valor do modelo para exibição
+    this.valorFormatado = this.currentLivro.valor.toFixed(2).replace('.', ',');
   }
 
   goToDashboard(): void {
