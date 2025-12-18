@@ -1,0 +1,244 @@
+<div class="livro-container">
+  <nz-card nzTitle="Gerenciamento de Livros">
+    <!-- Botão voltar -->
+    <button
+      nz-button
+      nzType="link"
+      (click)="goToDashboard()"
+      class="back-button"
+    >
+      <span nz-icon nzType="arrow-left"></span>
+      Voltar ao Dashboard
+    </button>
+
+    <!-- Barra de ações -->
+    <div class="action-bar">
+      <div class="search-section">
+        <nz-input-group [nzSuffix]="suffixIconSearch" class="search-input">
+          <input
+            type="text"
+            nz-input
+            placeholder="Pesquisar por título"
+            [(ngModel)]="searchText"
+            (keyup.enter)="search()"
+          />
+        </nz-input-group>
+        <ng-template #suffixIconSearch>
+          <span nz-icon nzType="search"></span>
+        </ng-template>
+        <button nz-button nzType="primary" (click)="search()">
+          <span nz-icon nzType="search"></span>
+          Pesquisar
+        </button>
+        <button nz-button (click)="clearSearch()">
+          <span nz-icon nzType="clear"></span>
+          Limpar
+        </button>
+      </div>
+      <button nz-button nzType="primary" (click)="showModal()">
+        <span nz-icon nzType="plus"></span>
+        Novo Livro
+      </button>
+    </div>
+
+    <!-- Tabela de livros -->
+    <nz-table
+      #livroTable
+      [nzData]="filteredLivros"
+      [nzPageSize]="pageSize"
+      [nzPageIndex]="pageIndex"
+      [nzLoading]="loading"
+      [nzShowSizeChanger]="false"
+      (nzPageIndexChange)="pageIndex = $event"
+      class="livro-table"
+    >
+      <thead>
+        <tr>
+          <th>Título</th>
+          <th>Autores</th>
+          <th>Assuntos</th>
+          <th>Editora</th>
+          <th nzAlign="right">Valor</th>
+          <th nzWidth="150px" nzAlign="center">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let livro of livroTable.data">
+          <td>{{ livro.titulo }}</td>
+          <td>{{ getAutoresNomes(livro.autores) }}</td>
+          <td>{{ getAssuntosDescricoes(livro.assuntos) }}</td>
+          <td>{{ livro.editora }}</td>
+          <td nzAlign="right">{{ livro.valor | currency:'BRL' }}</td>
+          <td nzAlign="center">
+            <nz-space>
+              <button
+                *nzSpaceItem
+                nz-button
+                nzType="default"
+                nzSize="small"
+                (click)="showEditModal(livro)"
+                nz-tooltip
+                nzTooltipTitle="Editar"
+              >
+                <span nz-icon nzType="edit" nzTheme="outline"></span>
+              </button>
+              <button
+                *nzSpaceItem
+                nz-button
+                nzType="default"
+                nzDanger
+                nzSize="small"
+                nz-popconfirm
+                nzPopconfirmTitle="Tem certeza que deseja excluir este livro?"
+                nzPopconfirmPlacement="left"
+                (nzOnConfirm)="confirmDelete(livro)"
+                nz-tooltip
+                nzTooltipTitle="Excluir"
+              >
+                <span nz-icon nzType="delete" nzTheme="outline"></span>
+              </button>
+            </nz-space>
+          </td>
+        </tr>
+      </tbody>
+    </nz-table>
+  </nz-card>
+
+  <!-- Modal para criar/editar livro -->
+  <nz-modal
+    [(nzVisible)]="isModalVisible"
+    [nzTitle]="isEditMode ? 'Editar Livro' : 'Novo Livro'"
+    (nzOnCancel)="handleCancel()"
+    (nzOnOk)="handleOk()"
+    [nzOkText]="isEditMode ? 'Atualizar' : 'Criar'"
+    nzCancelText="Cancelar"
+    [nzWidth]="700"
+  >
+    <ng-container *nzModalContent>
+      <form nz-form>
+        <div nz-row [nzGutter]="16">
+          <div nz-col [nzSpan]="24">
+            <nz-form-item>
+              <nz-form-label [nzSpan]="24" nzRequired>Título</nz-form-label>
+              <nz-form-control [nzSpan]="24">
+                <input
+                  nz-input
+                  [(ngModel)]="currentLivro.titulo"
+                  name="titulo"
+                  placeholder="Digite o título do livro"
+                  maxlength="40"
+                />
+                <small class="char-count">{{ currentLivro.titulo.length }}/40 caracteres</small>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+
+          <div nz-col [nzSpan]="12">
+            <nz-form-item>
+              <nz-form-label [nzSpan]="24" nzRequired>Editora</nz-form-label>
+              <nz-form-control [nzSpan]="24">
+                <input
+                  nz-input
+                  [(ngModel)]="currentLivro.editora"
+                  name="editora"
+                  placeholder="Digite a editora"
+                  maxlength="40"
+                />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+
+          <div nz-col [nzSpan]="12">
+            <nz-form-item>
+              <nz-form-label [nzSpan]="24" nzRequired>Edição</nz-form-label>
+              <nz-form-control [nzSpan]="24">
+                <nz-input-number
+                  [(ngModel)]="currentLivro.edicao"
+                  name="edicao"
+                  [nzMin]="1"
+                  [nzStep]="1"
+                  style="width: 100%"
+                ></nz-input-number>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+
+          <div nz-col [nzSpan]="12">
+            <nz-form-item>
+              <nz-form-label [nzSpan]="24" nzRequired>Ano de Publicação</nz-form-label>
+              <nz-form-control [nzSpan]="24">
+                <nz-input-number
+                  [(ngModel)]="currentLivro.anoPublicacao"
+                  name="anoPublicacao"
+                  [nzMin]="1000"
+                  [nzMax]="9999"
+                  [nzStep]="1"
+                  style="width: 100%"
+                ></nz-input-number>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+
+          <div nz-col [nzSpan]="12">
+            <nz-form-item>
+              <nz-form-label [nzSpan]="24" nzRequired>Valor</nz-form-label>
+              <nz-form-control [nzSpan]="24">
+                <nz-input-number
+                  [(ngModel)]="currentLivro.valor"
+                  name="valor"
+                  [nzMin]="0"
+                  [nzStep]="0.01"
+                  [nzPrecision]="2"
+                  nzPlaceHolder="R$ 0,00"
+                  style="width: 100%"
+                ></nz-input-number>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+
+          <div nz-col [nzSpan]="24">
+            <nz-form-item>
+              <nz-form-label [nzSpan]="24" nzRequired>Autores</nz-form-label>
+              <nz-form-control [nzSpan]="24">
+                <nz-select
+                  [(ngModel)]="selectedAutorIds"
+                  name="autores"
+                  nzMode="multiple"
+                  nzPlaceHolder="Selecione os autores"
+                  style="width: 100%"
+                >
+                  <nz-option
+                    *ngFor="let autor of autores"
+                    [nzValue]="autor.id"
+                    [nzLabel]="autor.nome"
+                  ></nz-option>
+                </nz-select>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+
+          <div nz-col [nzSpan]="24">
+            <nz-form-item>
+              <nz-form-label [nzSpan]="24" nzRequired>Assuntos</nz-form-label>
+              <nz-form-control [nzSpan]="24">
+                <nz-select
+                  [(ngModel)]="selectedAssuntoIds"
+                  name="assuntos"
+                  nzMode="multiple"
+                  nzPlaceHolder="Selecione os assuntos"
+                  style="width: 100%"
+                >
+                  <nz-option
+                    *ngFor="let assunto of assuntos"
+                    [nzValue]="assunto.id"
+                    [nzLabel]="assunto.descricao"
+                  ></nz-option>
+                </nz-select>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
+      </form>
+    </ng-container>
+  </nz-modal>
+</div>

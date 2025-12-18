@@ -1,0 +1,30 @@
+<div class="dashboard-container">
+  <div class="dashboard-header">
+    <h1>Sistema de Cadastro de Livros</h1>
+    <p>Bem-vindo ao sistema de gerenciamento de livros, autores e assuntos</p>
+  </div>
+
+  <div nz-row [nzGutter]="[16, 16]" class="dashboard-grid">
+    @for (item of menuItems; track item.route) {
+      <div nz-col [nzXs]="24" [nzSm]="12" [nzMd]="12" [nzLg]="6">
+        <nz-card
+          class="dashboard-card"
+          [nzHoverable]="true"
+          (click)="navigateTo(item.route)"
+        >
+          <div class="card-content">
+            <div class="card-icon" [style.background-color]="item.color">
+              <span nz-icon [nzType]="item.icon" nzTheme="outline"></span>
+            </div>
+            <h3>{{ item.title }}</h3>
+            <p>{{ item.description }}</p>
+            <button nz-button nzType="link" class="card-button">
+              Acessar
+              <span nz-icon nzType="arrow-right" nzTheme="outline"></span>
+            </button>
+          </div>
+        </nz-card>
+      </div>
+    }
+  </div>
+</div>

@@ -1,0 +1,126 @@
+<div class="autor-container">
+  <nz-card nzTitle="Gerenciamento de Autores">
+    <!-- Botão voltar -->
+    <button
+      nz-button
+      nzType="link"
+      (click)="goToDashboard()"
+      class="back-button"
+    >
+      <span nz-icon nzType="arrow-left"></span>
+      Voltar ao Dashboard
+    </button>
+
+    <!-- Barra de ações -->
+    <div class="action-bar">
+      <div class="search-section">
+        <nz-input-group [nzSuffix]="suffixIconSearch" class="search-input">
+          <input
+            type="text"
+            nz-input
+            placeholder="Pesquisar por nome"
+            [(ngModel)]="searchText"
+            (keyup.enter)="search()"
+          />
+        </nz-input-group>
+        <ng-template #suffixIconSearch>
+          <span nz-icon nzType="search"></span>
+        </ng-template>
+        <button nz-button nzType="primary" (click)="search()">
+          <span nz-icon nzType="search"></span>
+          Pesquisar
+        </button>
+        <button nz-button (click)="clearSearch()">
+          <span nz-icon nzType="clear"></span>
+          Limpar
+        </button>
+      </div>
+      <button nz-button nzType="primary" (click)="showModal()">
+        <span nz-icon nzType="plus"></span>
+        Novo Autor
+      </button>
+    </div>
+
+    <!-- Tabela de autores -->
+    <nz-table
+      #autorTable
+      [nzData]="filteredAutores"
+      [nzPageSize]="pageSize"
+      [nzPageIndex]="pageIndex"
+      [nzLoading]="loading"
+      [nzShowSizeChanger]="false"
+      (nzPageIndexChange)="pageIndex = $event"
+      class="autor-table"
+    >
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th nzWidth="150px" nzAlign="center">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let autor of autorTable.data">
+          <td>{{ autor.nome }}</td>
+          <td nzAlign="center">
+            <nz-space>
+              <button
+                *nzSpaceItem
+                nz-button
+                nzType="default"
+                nzSize="small"
+                (click)="showEditModal(autor)"
+                nz-tooltip
+                nzTooltipTitle="Editar"
+              >
+                <span nz-icon nzType="edit" nzTheme="outline"></span>
+              </button>
+              <button
+                *nzSpaceItem
+                nz-button
+                nzType="default"
+                nzDanger
+                nzSize="small"
+                nz-popconfirm
+                nzPopconfirmTitle="Tem certeza que deseja excluir este autor?"
+                nzPopconfirmPlacement="left"
+                (nzOnConfirm)="deleteAutor(autor.id)"
+                nz-tooltip
+                nzTooltipTitle="Excluir"
+              >
+                <span nz-icon nzType="delete" nzTheme="outline"></span>
+              </button>
+            </nz-space>
+          </td>
+        </tr>
+      </tbody>
+    </nz-table>
+  </nz-card>
+
+  <!-- Modal para criar/editar autor -->
+  <nz-modal
+    [(nzVisible)]="isModalVisible"
+    [nzTitle]="isEditMode ? 'Editar Autor' : 'Novo Autor'"
+    (nzOnCancel)="handleCancel()"
+    (nzOnOk)="handleOk()"
+    [nzOkText]="isEditMode ? 'Atualizar' : 'Criar'"
+    nzCancelText="Cancelar"
+  >
+    <ng-container *nzModalContent>
+      <form nz-form>
+        <nz-form-item>
+          <nz-form-label [nzSpan]="24" nzRequired>Nome</nz-form-label>
+          <nz-form-control [nzSpan]="24">
+            <input
+              nz-input
+              [(ngModel)]="currentAutor.nome"
+              name="nome"
+              placeholder="Digite o nome do autor"
+              maxlength="40"
+            />
+            <small class="char-count">{{ currentAutor.nome.length }}/40 caracteres</small>
+          </nz-form-control>
+        </nz-form-item>
+      </form>
+    </ng-container>
+  </nz-modal>
+</div>

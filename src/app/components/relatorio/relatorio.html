@@ -1,0 +1,159 @@
+<div class="relatorio-container">
+  <nz-card nzTitle="Relatórios de Livros">
+    <!-- Botão voltar -->
+    <button
+      nz-button
+      nzType="link"
+      (click)="goToDashboard()"
+      class="back-button"
+    >
+      <span nz-icon nzType="arrow-left"></span>
+      Voltar ao Dashboard
+    </button>
+
+    <!-- Formulário de filtros -->
+    <form nz-form class="filter-form">
+      <div nz-row [nzGutter]="16">
+        <div nz-col [nzXs]="24" [nzSm]="12" [nzMd]="8">
+          <nz-form-item>
+            <nz-form-label>Título</nz-form-label>
+            <nz-form-control>
+              <input
+                nz-input
+                [(ngModel)]="titulo"
+                name="titulo"
+                placeholder="Filtrar por título"
+              />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+
+        <div nz-col [nzXs]="24" [nzSm]="12" [nzMd]="8">
+          <nz-form-item>
+            <nz-form-label>Autor</nz-form-label>
+            <nz-form-control>
+              <input
+                nz-input
+                [(ngModel)]="autor"
+                name="autor"
+                placeholder="Filtrar por autor"
+              />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+
+        <div nz-col [nzXs]="24" [nzSm]="12" [nzMd]="8">
+          <nz-form-item>
+            <nz-form-label>Assunto</nz-form-label>
+            <nz-form-control>
+              <input
+                nz-input
+                [(ngModel)]="assunto"
+                name="assunto"
+                placeholder="Filtrar por assunto"
+              />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+
+        <div nz-col [nzXs]="24" [nzSm]="12" [nzMd]="8">
+          <nz-form-item>
+            <nz-form-label>Valor Mínimo</nz-form-label>
+            <nz-form-control>
+              <nz-input-number
+                [(ngModel)]="valorMin"
+                name="valorMin"
+                [nzMin]="0"
+                [nzStep]="0.01"
+                [nzPrecision]="2"
+                nzPlaceHolder="R$ 0,00"
+                style="width: 100%"
+              ></nz-input-number>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+
+        <div nz-col [nzXs]="24" [nzSm]="12" [nzMd]="8">
+          <nz-form-item>
+            <nz-form-label>Valor Máximo</nz-form-label>
+            <nz-form-control>
+              <nz-input-number
+                [(ngModel)]="valorMax"
+                name="valorMax"
+                [nzMin]="0"
+                [nzStep]="0.01"
+                [nzPrecision]="2"
+                nzPlaceHolder="R$ 0,00"
+                style="width: 100%"
+              ></nz-input-number>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+
+      <!-- Opção de resultado -->
+      <div nz-row [nzGutter]="16" class="result-option-section">
+        <div nz-col [nzSpan]="24">
+          <nz-form-item>
+            <nz-form-label>Tipo de Resultado</nz-form-label>
+            <nz-form-control>
+              <nz-radio-group [(ngModel)]="resultOption" name="resultOption">
+                <label nz-radio nzValue="grid">Exibir em Grid</label>
+                <label nz-radio nzValue="pdf">Baixar PDF</label>
+              </nz-radio-group>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+
+      <!-- Botões de ação -->
+      <div nz-row [nzGutter]="16" class="action-buttons">
+        <div nz-col [nzSpan]="24">
+          <button nz-button nzType="primary" (click)="search()">
+            <span nz-icon [nzType]="resultOption === 'grid' ? 'search' : 'download'"></span>
+            {{ resultOption === 'grid' ? 'Pesquisar' : 'Baixar PDF' }}
+          </button>
+          <button nz-button (click)="clearFilters()" style="margin-left: 8px;">
+            <span nz-icon nzType="clear"></span>
+            Limpar Filtros
+          </button>
+        </div>
+      </div>
+    </form>
+
+    <!-- Grid de resultados (apenas quando opção grid está selecionada) -->
+    <div *ngIf="resultOption === 'grid' && reports.length > 0" class="results-section">
+      <nz-table
+        #reportTable
+        [nzData]="reports"
+        [nzPageSize]="pageSize"
+        [nzPageIndex]="pageIndex"
+        [nzLoading]="loading"
+        [nzShowSizeChanger]="false"
+        (nzPageIndexChange)="pageIndex = $event"
+      >
+        <thead>
+          <tr>
+            <th>Título</th>
+            <th>Autores</th>
+            <th>Assuntos</th>
+            <th nzAlign="right">Valor</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let report of reportTable.data">
+            <td>{{ report.tituloLivro }}</td>
+            <td>{{ report.nomesAutores }}</td>
+            <td>{{ report.descricoesAssuntos }}</td>
+            <td nzAlign="right">{{ report.valorLivro | currency:'BRL' }}</td>
+          </tr>
+        </tbody>
+      </nz-table>
+    </div>
+
+    <!-- Mensagem quando não há resultados -->
+    <div *ngIf="resultOption === 'grid' && reports.length === 0 && !loading" class="no-results">
+      <p>Nenhum resultado encontrado. Use os filtros acima e clique em "Pesquisar".</p>
+    </div>
+  </nz-card>
+</div>
